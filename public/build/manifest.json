@@ -1,0 +1,31 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-a71Xx6NF.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-mn0jsgDp.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/home.tsx": {
+    "file": "assets/home-BukalpHe.js",
+    "name": "home",
+    "src": "resources/js/home.tsx",
+    "isEntry": true,
+    "css": [
+      "assets/home-DNkGk_Ts.css"
+    ]
+  },
+  "resources/js/three-scene.js": {
+    "file": "assets/three-scene-00Lau-pM.js",
+    "name": "three-scene",
+    "src": "resources/js/three-scene.js",
+    "isEntry": true
+  }
+}

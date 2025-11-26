@@ -16,8 +16,7 @@
     <!-- Laravel Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Direct CSS link for testing -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-BdhG_vQw.css') }}">
+    
     
     <!-- Tailwind CSS CDN (fallback) -->
     <script src="https://cdn.tailwindcss.com"></script>

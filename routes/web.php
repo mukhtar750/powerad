@@ -54,15 +54,17 @@ Route::middleware(['auth'])->prefix('dashboard/advertiser')->name('advertiser.')
         }
         return view('payment.booking-form', ['billboard' => $b]);
     })->name('billboard.book');
+
+    Route::get('/payments/{payment}/invoice', [PaymentController::class, 'downloadInvoice'])->name('payment.invoice');
 });
 
 Route::get('/dashboard/advertiser/my-campaigns', function () {
     return view('dashboards.advertiser.my-campaigns');
 })->middleware(['auth'])->name('dashboard.advertiser.my-campaigns');
 
-Route::get('/dashboard/advertiser/payments', function () {
-    return view('dashboards.advertiser.payments');
-})->middleware(['auth'])->name('dashboard.advertiser.payments');
+Route::get('/dashboard/advertiser/payments', [PaymentController::class, 'advertiserPayments'])
+    ->middleware(['auth'])
+    ->name('dashboard.advertiser.payments');
 
 Route::get('/dashboard/advertiser/analytics', function () {
     return view('dashboards.advertiser.analytics');

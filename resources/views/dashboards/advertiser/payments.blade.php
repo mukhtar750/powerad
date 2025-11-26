@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advertiser Dashboard - Payments</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="{{ asset('build/assets/app-BdhG_vQw.css') }}">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
@@ -139,7 +138,7 @@
                         <div class="flex items-center justify-between mb-3">
                             <div>
                                 <p class="text-sm text-gray-400 font-medium">Total Spent</p>
-                                <h3 class="text-2xl md:text-3xl font-bold text-white">$7,000</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-white">₦{{ number_format((float)($summary['total'] ?? 0)) }}</h3>
                             </div>
                             <div class="p-3 bg-blue-500/20 rounded-full text-blue-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,7 +153,7 @@
                         <div class="flex items-center justify-between mb-3">
                             <div>
                                 <p class="text-sm text-gray-400 font-medium">Paid</p>
-                                <h3 class="text-2xl md:text-3xl font-bold text-green-400">$5,500</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-green-400">₦{{ number_format((float)($summary['paid'] ?? 0)) }}</h3>
                             </div>
                             <div class="p-3 bg-green-500/20 rounded-full text-green-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +168,7 @@
                         <div class="flex items-center justify-between mb-3">
                             <div>
                                 <p class="text-sm text-gray-400 font-medium">Pending</p>
-                                <h3 class="text-2xl md:text-3xl font-bold text-orange">$1,500</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-orange">₦{{ number_format((float)($summary['pending'] ?? 0)) }}</h3>
                             </div>
                             <div class="p-3 bg-orange/20 rounded-full text-orange">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,77 +188,34 @@
                 </div>
                 
                 <div class="space-y-4">
-                    <!-- Payment Transaction 1 -->
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-semibold text-white">Summer Fashion Campaign</h3>
-                                    <span class="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-medium rounded-full">Completed</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-white">$2,300</p>
-                                        <p class="text-gray-400 text-sm">2024-01-20 • Credit Card</p>
+                    @forelse($payments as $p)
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h3 class="font-semibold text-white">{{ $p->billboard->title ?? 'Payment' }}</h3>
+                                        @php($status = $p->status)
+                                        <span class="px-3 py-1 text-sm font-medium rounded-full {{ $status === 'success' ? 'bg-green-500/20 text-green-400' : ($status === 'pending' || $status === 'initialized' ? 'bg-orange/20 text-orange' : 'bg-red-500/20 text-red-400') }}">{{ ucfirst($status) }}</span>
                                     </div>
-                                    <button class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Invoice
-                                    </button>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-2xl font-bold text-white">₦{{ number_format((float)$p->amount) }}</p>
+                                            <p class="text-gray-400 text-sm">{{ optional($p->transaction_date ?? $p->created_at)->format('Y-m-d') }} • Ref: {{ $p->reference }}</p>
+                                        </div>
+                                        <a href="{{ route('payment.invoice', $p->id) }}" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Invoice
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Payment Transaction 2 -->
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-semibold text-white">Holiday Special</h3>
-                                    <span class="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-medium rounded-full">Completed</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-white">$3,200</p>
-                                        <p class="text-gray-400 text-sm">2023-12-15 • Bank Transfer</p>
-                                    </div>
-                                    <button class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Invoice
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Transaction 3 -->
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-semibold text-white">Tech Product Launch</h3>
-                                    <span class="px-3 py-1 bg-orange/20 text-orange text-sm font-medium rounded-full">Pending</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-white">$1,500</p>
-                                        <p class="text-gray-400 text-sm">2024-02-01 • Credit Card</p>
-                                    </div>
-                                    <button class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Invoice
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @empty
+                        <div class="text-gray-400">No payment records found.</div>
+                    @endforelse
+                    <div class="mt-4">{{ $payments->links() }}</div>
                 </div>
             </div>
         </main>

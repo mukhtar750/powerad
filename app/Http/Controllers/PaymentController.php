@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -29,6 +30,47 @@ class PaymentController extends Controller
         $this->paystackBaseUrl = config('services.paystack.base_url');
         $this->providerSubaccountCode = config('services.paystack.provider_subaccount_code');
         $this->notificationService = $notificationService;
+    }
+
+    public function advertiserPayments()
+    {
+        $userId = Auth::id();
+        $payments = Payment::with(['billboard', 'booking'])
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        $paid = Payment::where('user_id', $userId)->where('status', 'success')->sum('amount');
+        $pending = Payment::where('user_id', $userId)->whereIn('status', ['pending', 'initialized'])->sum('amount');
+        $total = Payment::where('user_id', $userId)->sum('amount');
+
+        $summary = [
+            'total' => $total,
+            'paid' => $paid,
+            'pending' => $pending,
+        ];
+
+        return view('dashboards.advertiser.payments', compact('payments', 'summary'));
+    }
+
+    public function downloadInvoice(Payment $payment)
+    {
+        abort_unless(Auth::id() === $payment->user_id, 403);
+        $booking = $payment->booking;
+        $billboard = $payment->billboard;
+        $date = now()->format('Y-m-d');
+        $amount = number_format((float)$payment->amount);
+        $companyCommission = $booking ? number_format((float)$booking->company_commission) : '0';
+        $loapAmount = $booking ? number_format((float)$booking->loap_amount) : '0';
+        $duration = $booking ? $booking->duration_days : null;
+        $start = $booking ? 
+            (is_string($booking->start_date) ? $booking->start_date : optional($booking->start_date)->format('Y-m-d')) : null;
+        $end = $booking ? 
+            (is_string($booking->end_date) ? $booking->end_date : optional($booking->end_date)->format('Y-m-d')) : null;
+        $title = $billboard ? $billboard->title : 'Billboard';
+        $ref = $payment->reference;
+        $pdf = Pdf::loadView('invoices.payment', compact('payment','booking','billboard','date','amount','companyCommission','loapAmount','duration','start','end','title','ref'));
+        return $pdf->download('invoice-'.$ref.'.pdf');
     }
 
     /**

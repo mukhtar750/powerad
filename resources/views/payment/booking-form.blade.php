@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billboard Booking - DHOA Portal</title>
+    <title>Billboard Booking</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
@@ -101,26 +101,27 @@
     </style>
 </head>
 <body>
+    @php($billboard = isset($billboard) ? $billboard : \App\Models\Billboard::find(request()->route('billboard')))
     <div class="booking-container">
         <h1>Book Billboard Advertisement</h1>
         
         <!-- Billboard Information -->
         <div class="billboard-info">
-            <div class="billboard-title" id="billboard-title">Sample Billboard</div>
+            <div class="billboard-title" id="billboard-title">{{ $billboard->title }}</div>
             <div class="billboard-details">
-                <p><strong>Location:</strong> <span id="billboard-location">Victoria Island, Lagos</span></p>
-                <p><strong>Size:</strong> <span id="billboard-size">48ft x 14ft</span></p>
-                <p><strong>Type:</strong> <span id="billboard-type">Digital LED</span></p>
-                <p><strong>Price per day:</strong> <span class="price-display" id="daily-price">₦50,000</span></p>
+                <p><strong>Location:</strong> <span id="billboard-location">{{ $billboard->address ?? ($billboard->location ?: ($billboard->city.', '.$billboard->state)) }}</span></p>
+                <p><strong>Size:</strong> <span id="billboard-size">{{ $billboard->size }}</span></p>
+                <p><strong>Type:</strong> <span id="billboard-type">{{ $billboard->type }}</span></p>
+                <p><strong>Price per day:</strong> <span class="price-display" id="daily-price">₦{{ number_format((float)$billboard->price_per_day, 0) }}</span></p>
             </div>
         </div>
 
         <form id="booking-form">
-            <input type="hidden" name="billboard_id" id="billboard_id" value="1">
+            <input type="hidden" name="billboard_id" id="billboard_id" value="{{ $billboard->id }}">
             
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" name="email" id="email" required placeholder="your@email.com">
+                <input type="email" name="email" id="email" required value="{{ auth()->user()->email }}" readonly>
             </div>
 
             <div class="form-group">
@@ -186,7 +187,7 @@
         function calculateTotal() {
             const startDate = document.getElementById('start_date').value;
             const endDate = document.getElementById('end_date').value;
-            const dailyPrice = 50000; // ₦50,000 per day
+            const dailyPrice = {{ (float)($billboard->price_per_day ?? 0) }};
 
             if (startDate && endDate) {
                 const start = new Date(startDate);

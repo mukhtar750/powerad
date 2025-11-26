@@ -446,7 +446,7 @@
                         </div>
                         <h3 class="text-xl font-orbitron font-bold text-white mb-2 text-center">Fragmented Industry</h3>
                         <p class="text-gray-300 text-center font-futura">
-                            Billboard owners, advertisers, and service providers operate in
+                            Billboard owners, advertisers, service providers, and regulators operate in
                             silos with no unified platform
                         </p>
                     </div>
@@ -517,7 +517,7 @@
                         <h3 class="text-xl font-orbitron font-bold text-white mb-2 text-center">Fragmented Industry</h3>
                         <p class="text-gray-300 text-center font-futura">
                             Billboard owners, advertisers,
-                            and service providers operate in
+                            service providers, and regulators operate in
                             silos with no unified platform
                         </p>
                     </div>
@@ -589,7 +589,7 @@
                         </div>
                         <h3 class="text-xl font-orbitron font-bold text-white mb-2 text-center">Unified Platform</h3>
                         <p class="text-gray-300 text-center font-futura">
-                            A single, integrated platform connecting billboard owners, advertisers, and service providers.
+                            A single, integrated platform connecting billboard owners, advertisers, service providers, and regulators.
                         </p>
                     </div>
 
@@ -636,7 +636,7 @@
                         </div>
                         <h3 class="text-xl font-orbitron font-bold text-white mb-2 text-center">Unified Platform</h3>
                         <p class="text-gray-300 text-center font-futura">
-                            A single, integrated platform connecting billboard owners, advertisers, and service providers.
+                            A single, integrated platform connecting billboard owners, advertisers, service providers, and regulators.
                         </p>
                     </div>
 

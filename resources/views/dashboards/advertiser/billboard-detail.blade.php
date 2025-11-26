@@ -253,7 +253,7 @@
                             <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
                             <input type="email" name="email" id="email" 
                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange focus:border-orange" 
-                                   placeholder="your@email.com" required>
+                                   value="{{ auth()->user()->email }}" readonly required>
                         </div>
 
                         <div class="mb-4">

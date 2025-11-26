@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('notifications')) {
+            return;
+        }
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->string('type'); // booking_created, payment_success, billboard_verified, etc.
@@ -19,7 +22,6 @@ return new class extends Migration
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
             
-            $table->index(['notifiable_type', 'notifiable_id']);
             $table->index('type');
             $table->index('read_at');
         });

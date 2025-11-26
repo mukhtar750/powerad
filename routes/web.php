@@ -48,7 +48,11 @@ Route::middleware(['auth'])->prefix('dashboard/advertiser')->name('advertiser.')
     Route::get('/my-bookings', [App\Http\Controllers\AdvertiserBillboardController::class, 'myBookings'])->name('my-bookings');
     Route::post('/bookings/{booking}/cancel', [App\Http\Controllers\AdvertiserBillboardController::class, 'cancelBooking'])->name('bookings.cancel');
     Route::get('/book/{billboard}', function ($billboard) {
-        return view('payment.booking-form', ['billboard_id' => $billboard]);
+        $b = \App\Models\Billboard::findOrFail($billboard);
+        if (!$b->is_active || !$b->is_verified || $b->status !== 'available') {
+            abort(404);
+        }
+        return view('payment.booking-form', ['billboard' => $b]);
     })->name('billboard.book');
 });
 

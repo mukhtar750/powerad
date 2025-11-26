@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In · POWERAD INTERNATIONAL</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-[#363366] via-[#2E2A5F] to-[#1F1B4B] text-white">
     <div class="relative min-h-screen">

@@ -63,11 +63,11 @@ export default defineConfig({
         },
     },
     server: {
-        // Bind to localhost to ensure preview can reach HMR
-        host: '127.0.0.1',
+        // Bind to 0.0.0.0 to allow external access
+        host: '0.0.0.0',
         port: 5173,
         hmr: {
-            host: '127.0.0.1',
+            host: '192.168.1.120',
         },
         cors: true,
     },

@@ -83,7 +83,7 @@
                     <label for="regulator_type_select" class="block text-gray-700 text-sm font-bold mb-2">Regulator Type</label>
                     <select id="regulator_type_select" class="w-full px-4 py-3 bg-[#111827] border border-white/10 rounded-lg text-white/90 focus:outline-none">
                         <option value="">Select type</option>
-                        <option value="arcon">Federal (ARCON)</option>
+                        <option value="arcon">ARCON</option>
                         <option value="state">State Regulator</option>
                     </select>
 

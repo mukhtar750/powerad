@@ -1,29 +1,30 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-CcGl7CPr.css",
+    "file": "assets/app-DzlUSeUZ.css",
     "src": "resources/css/app.css",
     "isEntry": true,
+    "name": "app",
     "names": [
       "app.css"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-mn0jsgDp.js",
+    "file": "assets/app-D_ZgYw4K.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
   },
   "resources/js/home.tsx": {
-    "file": "assets/home-Cd30kV8T.js",
+    "file": "assets/home-DVisHoF4.js",
     "name": "home",
     "src": "resources/js/home.tsx",
     "isEntry": true,
     "css": [
-      "assets/home-DNkGk_Ts.css"
+      "assets/home-7GQYY_LK.css"
     ]
   },
   "resources/js/three-scene.js": {
-    "file": "assets/three-scene-00Lau-pM.js",
+    "file": "assets/three-scene-EE9kWc0b.js",
     "name": "three-scene",
     "src": "resources/js/three-scene.js",
     "isEntry": true

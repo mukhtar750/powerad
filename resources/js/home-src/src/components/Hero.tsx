@@ -126,7 +126,7 @@ export function Hero() {
           transition={{ delay: 0.4, duration: 0.8 }}
           className="text-xl md:text-2xl text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed"
         >
-          Nigeria's first digital marketplace and workflow hub connecting billboard owners, advertisers, service providers, and regulators in one seamless platform.
+          Nigeria's first digital marketplace and workflow hub connecting billboard owners, advertisers, regulators and service providers in one seamless platform.
         </motion.p>
 
         <motion.div

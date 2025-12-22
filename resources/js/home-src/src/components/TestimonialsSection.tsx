@@ -39,7 +39,7 @@ export function TestimonialsSection() {
   ];
 
   return (
-    <section className="relative py-24 bg-gradient-to-b from-[#2a2850] to-[#363366]">
+    <section id="testimonials" className="relative py-24 bg-gradient-to-b from-[#2a2850] to-[#363366]">
       <div className="max-w-7xl mx-auto px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

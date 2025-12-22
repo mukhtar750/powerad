@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminUserController;
@@ -179,7 +180,7 @@ Route::middleware(['auth', 'role:loap'])->prefix('dashboard/loap')->name('loap.'
     Route::get('/payments/ledger', function () {
         $payments = \App\Models\Payment::with(['user', 'billboard', 'booking'])
             ->whereHas('booking', function ($q) {
-                $q->where('loap_id', auth()->id());
+            $q->where('loap_id', Auth::id());
             })
             ->orderByDesc('created_at')
             ->paginate(20);

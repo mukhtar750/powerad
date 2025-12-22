@@ -14,22 +14,22 @@ export function VisionSection() {
     {
       phase: 'Phase 2',
       location: 'West Africa',
-      status: 'Q2 2026',
-      year: '2026',
+      status: 'Q2 2027',
+      year: '2027',
       color: 'from-[#F58634] to-[#ff9d5c]',
     },
     {
       phase: 'Phase 3',
       location: 'South Africa',
-      status: 'Q4 2027',
-      year: '2027',
+      status: 'Q4 2028',
+      year: '2028',
       color: 'from-blue-500 to-cyan-500',
     },
     {
       phase: 'Phase 4',
       location: 'Pan-African',
-      status: '2028',
-      year: '2028',
+      status: '2029',
+      year: '2029',
       color: 'from-purple-500 to-pink-500',
     },
   ];

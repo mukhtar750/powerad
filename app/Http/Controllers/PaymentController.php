@@ -69,7 +69,8 @@ class PaymentController extends Controller
             (is_string($booking->end_date) ? $booking->end_date : optional($booking->end_date)->format('Y-m-d')) : null;
         $title = $billboard ? $billboard->title : 'Billboard';
         $ref = $payment->reference;
-        $pdf = Pdf::loadView('invoices.payment', compact('payment','booking','billboard','date','amount','companyCommission','loapAmount','duration','start','end','title','ref'));
+        $gdAvailable = extension_loaded('gd');
+        $pdf = Pdf::loadView('invoices.payment', compact('payment','booking','billboard','date','amount','companyCommission','loapAmount','duration','start','end','title','ref','gdAvailable'));
         return $pdf->download('invoice-'.$ref.'.pdf');
     }
 
@@ -175,6 +176,7 @@ class PaymentController extends Controller
             $subData = data_get($subResponse->json(), 'data');
 
             // Step 3: Persist bank details and subaccount in users table
+            $user = User::find($user->id);
             $user->update([
                 'bank_name' => $request->bank_name,
                 'bank_code' => $request->bank_code,
@@ -730,7 +732,7 @@ class PaymentController extends Controller
         try {
             $user = Auth::user();
             
-            if (!$user->isLoap()) {
+            if ($user->role !== 'loap') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Only LOAP users can create subaccounts'
@@ -775,6 +777,7 @@ class PaymentController extends Controller
                 $responseData = $response->json();
                 
                 if ($responseData['status']) {
+                    $user = User::find($user->id);
                     $user->update([
                         'paystack_subaccount_code' => $responseData['data']['subaccount_code'],
                         'paystack_subaccount_id' => $responseData['data']['id'],

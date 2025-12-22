@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Button } from './ui/button';
-import { ArrowRight, Play, Sparkles, TrendingUp, Shield, Zap } from 'lucide-react';
+import { ArrowRight, Play, Sparkles, TrendingUp, Shield, Zap, Wrench } from 'lucide-react';
 // Use primary logo for the initial navbar at the top of the homepage
 const logoImage = '/images/primarylogo.png';
 
@@ -196,9 +196,8 @@ export function HeroNew() {
         >
           The complete platform connecting{' '}
           <span className="text-[#F58634]">billboard owners</span>,{' '}
-          <span className="text-[#F58634]">advertisers</span>,{' '}
-          <span className="text-[#F58634]">service providers</span>, and{' '}
-          <span className="text-[#F58634]">regulators</span> across Nigeria and beyond
+          <span className="text-[#F58634]">advertisers</span>, and{' '}
+          <span className="text-[#F58634]">service providers</span> across Nigeria and beyond
         </motion.p>
 
         <motion.div

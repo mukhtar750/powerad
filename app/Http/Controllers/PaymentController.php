@@ -21,6 +21,9 @@ class PaymentController extends Controller
     private $paystackPublicKey;
     private $paystackBaseUrl;
     private $providerSubaccountCode;
+    private $flutterSecretKey;
+    private $flutterPublicKey;
+    private $flutterBaseUrl;
     private $notificationService;
 
     public function __construct(NotificationService $notificationService)
@@ -29,6 +32,9 @@ class PaymentController extends Controller
         $this->paystackPublicKey = config('services.paystack.public_key');
         $this->paystackBaseUrl = config('services.paystack.base_url');
         $this->providerSubaccountCode = config('services.paystack.provider_subaccount_code');
+        $this->flutterSecretKey = config('services.flutterwave.secret_key');
+        $this->flutterPublicKey = config('services.flutterwave.public_key');
+        $this->flutterBaseUrl = config('services.flutterwave.base_url');
         $this->notificationService = $notificationService;
     }
 
@@ -281,154 +287,15 @@ class PaymentController extends Controller
                 'transaction_date' => null,
             ]);
 
-            // Prepare Paystack payment data with split payment
-            $paymentData = [
-                'email' => $request->email, // Use the email from the form
-                'amount' => $totalAmount * 100, // Paystack expects amount in kobo
-                'reference' => $reference,
-                'callback_url' => route('payment.callback'),
-                'metadata' => [
-                    'booking_id' => $booking->id,
-                    'billboard_title' => $billboard->title,
-                    'advertiser_name' => $advertiser->name,
-                    'advertiser_email' => $request->email,
-                    'loap_name' => $loap->name,
-                    'duration_days' => $durationDays,
-                    'company_commission' => $companyCommission,
-                    'loap_amount' => $loapAmount,
-                ]
-            ];
-
-            // Add split payment
-            if ($loap->paystack_subaccount_code && $this->providerSubaccountCode) {
-                // Create a transaction split for LOAP (90%) and provider (10%)
-                $splitPayload = [
-                    'name' => 'BookingSplit_' . $reference,
-                    'type' => 'percentage',
-                    'currency' => 'NGN',
-                    'bearer_type' => 'account',
-                    'subaccounts' => [
-                        [
-                            'subaccount' => $loap->paystack_subaccount_code,
-                            'share' => 90,
-                        ],
-                        [
-                            'subaccount' => $this->providerSubaccountCode,
-                            'share' => 10,
-                        ],
-                    ],
-                ];
-
-                $splitResponse = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $this->paystackSecretKey,
-                    'Content-Type' => 'application/json',
-                ])->post($this->paystackBaseUrl . '/split', $splitPayload);
-
-                if ($splitResponse->successful() && data_get($splitResponse->json(), 'status') === true) {
-                    $paymentData['split_code'] = data_get($splitResponse->json(), 'data.split_code');
-                    // Update split metadata on Payment record
-                    Payment::where('reference', $reference)->update([
-                        'split_data' => [
-                            'type' => 'percentage_split',
-                            'split_code' => data_get($splitResponse->json(), 'data.split_code'),
-                            'shares' => [
-                                ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                                ['subaccount' => $this->providerSubaccountCode, 'share' => 10],
-                            ],
-                            'subaccounts' => [
-                                ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                                ['subaccount' => $this->providerSubaccountCode, 'share' => 10],
-                            ],
-                        ],
-                    ]);
-                } else {
-                    // Fallback to single subaccount split to LOAP and charge company commission
-                    $paymentData['subaccount'] = $loap->paystack_subaccount_code;
-                    $paymentData['transaction_charge'] = $companyCommission * 100; // kobo
-                    $paymentData['bearer_type'] = 'account';
-                    Log::warning('Paystack split creation failed, falling back to single subaccount', [
-                        'response' => $splitResponse->body(),
-                        'status_code' => $splitResponse->status(),
-                    ]);
-                    Payment::where('reference', $reference)->update([
-                        'split_data' => [
-                            'type' => 'single_subaccount',
-                            'subaccount' => $loap->paystack_subaccount_code,
-                            'transaction_charge_kobo' => (int)($companyCommission * 100),
-                            'bearer_type' => 'account',
-                            'subaccounts' => $this->providerSubaccountCode ? [
-                                ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                                ['subaccount' => $this->providerSubaccountCode, 'share' => 10],
-                            ] : [
-                                ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                            ],
-                        ],
-                    ]);
-                }
-            } elseif ($loap->paystack_subaccount_code) {
-                // Single split: LOAP subaccount gets 90%, platform commission retained
-                $paymentData['subaccount'] = $loap->paystack_subaccount_code;
-                $paymentData['transaction_charge'] = $companyCommission * 100; // kobo
-                $paymentData['bearer_type'] = 'account';
-                Payment::where('reference', $reference)->update([
-                    'split_data' => [
-                        'type' => 'single_subaccount',
-                        'subaccount' => $loap->paystack_subaccount_code,
-                        'transaction_charge_kobo' => (int)($companyCommission * 100),
-                        'bearer_type' => 'account',
-                        'subaccounts' => $this->providerSubaccountCode ? [
-                            ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                            ['subaccount' => $this->providerSubaccountCode, 'share' => 10],
-                        ] : [
-                            ['subaccount' => $loap->paystack_subaccount_code, 'share' => 90],
-                        ],
-                    ],
-                ]);
-            }
-
-            // Initialize Paystack payment
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->paystackSecretKey,
-                'Content-Type' => 'application/json',
-            ])->post($this->paystackBaseUrl . '/transaction/initialize', $paymentData);
-
-        if ($response->successful()) {
-                $responseData = $response->json();
-                
-                if ($responseData['status']) {
-                    Payment::where('reference', $reference)->update([
-                        'status' => 'pending',
-                        'currency' => data_get($responseData, 'data.currency', 'NGN'),
-                    ]);
-                    return response()->json([
-                        'success' => true,
-                        'authorization_url' => $responseData['data']['authorization_url'],
-                        'access_code' => $responseData['data']['access_code'],
-                        'reference' => $responseData['data']['reference'],
-                        'email' => $request->email,
-                        'booking_id' => $booking->id,
-                        'amount' => $totalAmount,
-                        'company_commission' => $companyCommission,
-                        'loap_amount' => $loapAmount,
-                    ]);
-                }
-            }
-
-            // Log error and delete booking if payment initialization fails
-            Log::error('Paystack payment initialization failed', [
-                'booking_id' => $booking->id,
-                'response' => $response->body(),
-                'status_code' => $response->status()
-            ]);
-
-            // Mark payment as failed and delete booking
-            Payment::where('reference', $reference)->update(['status' => 'failed']);
-            $booking->delete();
-
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to initialize payment. Please try again.'
-            ], 400);
+                'success' => true,
+                'reference' => $reference,
+                'email' => $request->email,
+                'booking_id' => $booking->id,
+                'amount' => $totalAmount,
+                'company_commission' => $companyCommission,
+                'loap_amount' => $loapAmount,
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Payment initialization error', [
@@ -455,24 +322,28 @@ class PaymentController extends Controller
     {
         try {
         $reference = $request->query('reference');
+        $transactionId = $request->query('transaction_id');
         
         if (!$reference) {
             return redirect()->route('dashboard.advertiser')->with('error', 'Payment reference not found');
         }
 
-        // Verify payment with Paystack
+        if (!$transactionId) {
+            return redirect()->route('dashboard.advertiser')->with('error', 'Transaction ID not provided');
+        }
+
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->paystackSecretKey,
-            ])->get($this->paystackBaseUrl . "/transaction/verify/{$reference}");
+            'Authorization' => 'Bearer ' . $this->flutterSecretKey,
+            ])->get($this->flutterBaseUrl . "/transactions/{$transactionId}/verify");
 
         if ($response->successful()) {
             $paymentData = $response->json();
             
-                if ($paymentData['status'] && $paymentData['data']['status'] === 'success') {
+                if (data_get($paymentData, 'status') === 'success' && data_get($paymentData, 'data.status') === 'successful') {
                 $booking = Booking::where('payment_reference', $reference)->first();
                 
                     if ($booking && $booking->payment_status === 'pending') {
-                        $this->processSuccessfulPayment($booking, $paymentData['data']);
+                        $this->processSuccessfulPayment($booking, data_get($paymentData, 'data'));
                         
                         return redirect()->route('dashboard.advertiser')->with('success', 'Payment successful! Your booking is now active.');
                     }
@@ -656,23 +527,27 @@ class PaymentController extends Controller
     public function verifyPayment(string $reference)
     {
         try {
+            $transactionId = request()->query('transaction_id');
+            if (!$transactionId) {
+                return response()->json(['success' => false, 'message' => 'Transaction ID required'], 400);
+            }
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->paystackSecretKey,
-            ])->get($this->paystackBaseUrl . "/transaction/verify/{$reference}");
+                'Authorization' => 'Bearer ' . $this->flutterSecretKey,
+            ])->get($this->flutterBaseUrl . "/transactions/{$transactionId}/verify");
 
             if ($response->successful()) {
                 $paymentData = $response->json();
                 $booking = Booking::where('payment_reference', $reference)->first();
 
-                if (data_get($paymentData, 'status') && data_get($paymentData, 'data.status') === 'success') {
+                if (data_get($paymentData, 'status') === 'success' && data_get($paymentData, 'data.status') === 'successful') {
                     if ($booking && $booking->payment_status === 'pending') {
                         $this->processSuccessfulPayment($booking, data_get($paymentData, 'data'));
                     }
                     Payment::where('reference', $reference)->update([
                         'status' => 'success',
                         'currency' => data_get($paymentData, 'data.currency', 'NGN'),
-                        'gateway_response' => data_get($paymentData, 'data.gateway_response'),
-                        'transaction_date' => data_get($paymentData, 'data.paid_at') ?: data_get($paymentData, 'data.transaction_date'),
+                        'gateway_response' => data_get($paymentData, 'data.processor_response'),
+                        'transaction_date' => data_get($paymentData, 'data.created_at'),
                         'split_data' => data_get($paymentData, 'data'),
                     ]);
 
@@ -683,8 +558,8 @@ class PaymentController extends Controller
                 Payment::where('reference', $reference)->update([
                     'status' => 'failed',
                     'currency' => data_get($paymentData, 'data.currency', 'NGN'),
-                    'gateway_response' => data_get($paymentData, 'data.gateway_response'),
-                    'transaction_date' => data_get($paymentData, 'data.paid_at') ?: data_get($paymentData, 'data.transaction_date'),
+                    'gateway_response' => data_get($paymentData, 'data.processor_response'),
+                    'transaction_date' => data_get($paymentData, 'data.created_at'),
                     'split_data' => data_get($paymentData, 'data'),
                 ]);
             }

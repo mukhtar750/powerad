@@ -42,4 +42,10 @@ return [
         'provider_subaccount_code' => env('PAYSTACK_PROVIDER_SUBACCOUNT_CODE'),
     ],
 
+    'flutterwave' => [
+        'public_key' => env('FLW_PUBLIC_KEY'),
+        'secret_key' => env('FLW_SECRET_KEY'),
+        'base_url' => env('FLW_BASE_URL', 'https://api.flutterwave.com/v3'),
+    ],
+
 ];

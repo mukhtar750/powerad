@@ -429,18 +429,17 @@
             }
         }
 
-        // Initialize Paystack when page loads
-        let paystack;
+        let flutter;
         document.addEventListener('DOMContentLoaded', function() {
-            const initPaystack = () => {
-                if (window.PaystackPop) {
-                    paystack = new PaystackIntegration('{{ config('services.paystack.public_key') }}');
-                    console.log('Paystack initialized successfully');
+            const initFlutter = () => {
+                if (window.FlutterwaveCheckout) {
+                    flutter = new FlutterwaveIntegration('{{ config('services.flutterwave.public_key') }}');
+                    console.log('Flutterwave initialized successfully');
                 } else {
-                    setTimeout(initPaystack, 100);
+                    setTimeout(initFlutter, 100);
                 }
             };
-            initPaystack();
+            initFlutter();
         });
 
         // Handle form submission
@@ -457,7 +456,7 @@
             };
 
             try {
-                const result = await paystack.initializePayment(paymentData);
+                const result = await flutter.initializePayment(paymentData);
                 console.log('Payment initialized:', result);
             } catch (error) {
                 console.error('Payment failed:', error);

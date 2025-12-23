@@ -221,19 +221,17 @@
         document.getElementById('start_date').addEventListener('change', calculateTotal);
         document.getElementById('end_date').addEventListener('change', calculateTotal);
 
-        // Initialize Paystack when page loads
-        let paystack;
+        let flutter;
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait for Paystack script to load
-            const initPaystack = () => {
-                if (window.PaystackPop) {
-                    paystack = new PaystackIntegration('{{ config('services.paystack.public_key') }}');
-                    console.log('Paystack initialized successfully');
+            const initFlutter = () => {
+                if (window.FlutterwaveCheckout) {
+                    flutter = new FlutterwaveIntegration('{{ config('services.flutterwave.public_key') }}');
+                    console.log('Flutterwave initialized successfully');
                 } else {
-                    setTimeout(initPaystack, 100);
+                    setTimeout(initFlutter, 100);
                 }
             };
-            initPaystack();
+            initFlutter();
         });
     </script>
 </body>
